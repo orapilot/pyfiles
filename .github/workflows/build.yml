@@ -12,37 +12,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
-        python-version: ["3.10", "3.11", "3.12"]
-        exclude:
-          # 排除某些不兼容的组合（如果需要）
-          - os: macos-latest
-            python-version: "3.11"
-        include:
-          # 添加特定平台的配置（如果需要）
-          - os: ubuntu-22.04
-            install-cmd: sudo apt-get install -y
-            deps: cmake build-essential pkg-config \
-                  gstreamer1.0-gl \
-                  gstreamer1.0-opencv \
-                  gstreamer1.0-plugins-bad \
-                  gstreamer1.0-plugins-good \
-                  gstreamer1.0-plugins-ugly \
-                  gstreamer1.0-tools \
-                  libgstreamer-plugins-base1.0-dev \
-                  libgstreamer1.0-0 \
-                  libgstreamer1.0-dev
-          - os: ubuntu-24.04
-            install-cmd: sudo apt-get install -y
-            deps: cmake build-essential pkg-config  \
-                  gstreamer1.0-gl \
-                  gstreamer1.0-opencv \
-                  gstreamer1.0-plugins-bad \
-                  gstreamer1.0-plugins-good \
-                  gstreamer1.0-plugins-ugly \
-                  gstreamer1.0-tools \
-                  libgstreamer-plugins-base1.0-dev \
-                  libgstreamer1.0-0 \
-                  libgstreamer1.0-dev
+        python-version: ["3.11", "3.12"]
+        
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -51,15 +22,20 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Install system dependencies
-      if: matrix.deps != ''
-      run: ${{ matrix.install-cmd }} ${{ matrix.deps }}
-
-    - name: Install Python dependencies
+        
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install numpy scikit-build
+        sudo apt-get install --quiet -y --no-install-recommends \
+          gstreamer1.0-gl \
+          gstreamer1.0-opencv \
+          gstreamer1.0-plugins-bad \
+          gstreamer1.0-plugins-good \
+          gstreamer1.0-plugins-ugly \
+          gstreamer1.0-tools \
+          libgstreamer-plugins-base1.0-dev \
+          libgstreamer1.0-0 \
+          libgstreamer1.0-dev
 
     - name: Run build script
       env:
