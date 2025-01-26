@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
+        architecture: ["x86_64", "arm64"]
 
     steps:
     - name: Checkout repository
@@ -22,6 +23,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.architecture }}
 
     - name: Install dependencies
       run: |
@@ -53,6 +55,10 @@ jobs:
         cd "${TMPDIR}"
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
+
+        # Remove the "setuptools==59.2.0" line from pyproject.toml
+        sed -i '/"setuptools==59.2.0",/d' pyproject.toml
+
         python -m pip wheel . --verbose
 
     - name: Upload artifacts
