@@ -21,7 +21,7 @@ jobs:
           # 添加特定平台的配置（如果需要）
           - os: ubuntu-22.04
             install-cmd: sudo apt-get install -y
-            deps: cmake build-essential pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+            deps: cmake build-essential pkg-config \
                   gstreamer1.0-gl \
                   gstreamer1.0-opencv \
                   gstreamer1.0-plugins-bad \
@@ -33,7 +33,7 @@ jobs:
                   libgstreamer1.0-dev
           - os: ubuntu-24.04
             install-cmd: sudo apt-get install -y
-            deps: cmake build-essential pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+            deps: cmake build-essential pkg-config  \
                   gstreamer1.0-gl \
                   gstreamer1.0-opencv \
                   gstreamer1.0-plugins-bad \
