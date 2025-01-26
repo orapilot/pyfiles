@@ -1,0 +1,62 @@
+name: Build OpenCV Wheel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools wheel
+
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake git apt-get install --quiet -y --no-install-recommends \
+              gstreamer1.0-gl \
+              gstreamer1.0-opencv \
+              gstreamer1.0-plugins-bad \
+              gstreamer1.0-plugins-good \
+              gstreamer1.0-plugins-ugly \
+              gstreamer1.0-tools \
+              libgstreamer-plugins-base1.0-dev \
+              libgstreamer1.0-0 \
+              libgstreamer1.0-dev
+
+    - name: Build OpenCV wheel
+      env:
+        OPENCV_VER: "82"
+        ENABLE_CONTRIB: "0"
+        ENABLE_HEADLESS: "1"
+        CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
+      run: |
+        TMPDIR=$(mktemp -d)
+        cd "${TMPDIR}"
+        git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
+        cd opencv-python-${OPENCV_VER}
+        python -m pip wheel . --verbose
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: opencv-wheels
+        path: "${{ runner.temp }}/**/*.whl"
