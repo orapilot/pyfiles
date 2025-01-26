@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
-        architecture: ["x86_64", "arm64"]
+        architecture: ["x64", "arm64"]
 
     steps:
     - name: Checkout repository
