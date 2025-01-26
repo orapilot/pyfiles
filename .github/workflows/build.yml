@@ -8,12 +8,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
         architecture: ["x64", "arm64"]
+        include:
+          - python-version: "3.11"
+            os: ubuntu-22.04
+          - python-version: "3.12"
+            os: ubuntu-24.04
 
     steps:
     - name: Checkout repository
@@ -64,5 +69,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: opencv-wheels
+        name: opencv-wheels-${{ matrix.architecture }}-${{ matrix.python-version }}
         path: "${{ runner.temp }}/**/*.whl"
