@@ -1,55 +1,67 @@
-name: Build OpenCV Wheel
+name: Build OpenCV Python Wheels
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
-        architecture: ["x64", "arm64"]
+        os: [ubuntu-22.04, ubuntu-24.04]
+        python-version: ["3.10", "3.11", "3.12"]
+        exclude:
+          # 排除某些不兼容的组合（如果需要）
+          - os: macos-latest
+            python-version: "3.11"
         include:
-          - python-version: "3.11"
-            os: ubuntu-22.04
-          - python-version: "3.12"
-            os: ubuntu-24.04
-
+          # 添加特定平台的配置（如果需要）
+          - os: ubuntu-22.04
+            install-cmd: sudo apt-get install -y
+            deps: cmake build-essential pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+                  gstreamer1.0-gl \
+                  gstreamer1.0-opencv \
+                  gstreamer1.0-plugins-bad \
+                  gstreamer1.0-plugins-good \
+                  gstreamer1.0-plugins-ugly \
+                  gstreamer1.0-tools \
+                  libgstreamer-plugins-base1.0-dev \
+                  libgstreamer1.0-0 \
+                  libgstreamer1.0-dev
+          - os: ubuntu-24.04
+            install-cmd: sudo apt-get install -y
+            deps: cmake build-essential pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+                  gstreamer1.0-gl \
+                  gstreamer1.0-opencv \
+                  gstreamer1.0-plugins-bad \
+                  gstreamer1.0-plugins-good \
+                  gstreamer1.0-plugins-ugly \
+                  gstreamer1.0-tools \
+                  libgstreamer-plugins-base1.0-dev \
+                  libgstreamer1.0-0 \
+                  libgstreamer1.0-dev
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        architecture: ${{ matrix.architecture }}
 
-    - name: Install dependencies
+    - name: Install system dependencies
+      if: matrix.deps != ''
+      run: ${{ matrix.install-cmd }} ${{ matrix.deps }}
+
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install setuptools wheel
+        pip install numpy scikit-build
 
-    - name: Install build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install --quiet --no-install-recommends -y build-essential cmake git \
-              gstreamer1.0-gl \
-              gstreamer1.0-opencv \
-              gstreamer1.0-plugins-bad \
-              gstreamer1.0-plugins-good \
-              gstreamer1.0-plugins-ugly \
-              gstreamer1.0-tools \
-              libgstreamer-plugins-base1.0-dev \
-              libgstreamer1.0-0 \
-              libgstreamer1.0-dev
-
-    - name: Build OpenCV wheel
+    - name: Run build script
       env:
         OPENCV_VER: "82"
         ENABLE_CONTRIB: "0"
@@ -60,14 +72,15 @@ jobs:
         cd "${TMPDIR}"
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
-
-        # Remove the "setuptools==59.2.0" line from pyproject.toml
-        sed -i '/"setuptools==59.2.0",/d' pyproject.toml
-
         python -m pip wheel . --verbose
 
-    - name: Upload artifacts
+    - name: Find wheel package
+      # 查找生成的 wheel 文件
+      run: |
+        echo "WHEEL_NAME=$(find . -name '*.whl')" >> $GITHUB_ENV
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: opencv-wheels-${{ matrix.architecture }}-${{ matrix.python-version }}
-        path: "${{ runner.temp }}/**/*.whl"
+        name: opencv_wheel_${{ matrix.os }}_py${{ matrix.python-version }}
+        path: ${{ env.WHEEL_NAME }}
