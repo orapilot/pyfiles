@@ -48,7 +48,7 @@ jobs:
         cd "${TMPDIR}"
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
-        cp ../pyproject.toml .
+        cp /home/runner/work/pyfiles/pyfiles/pyproject.toml .
         python -m pip wheel . --verbose
 
     - name: Find wheel package
