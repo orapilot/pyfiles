@@ -57,7 +57,7 @@ jobs:
         echo "WHEEL_NAME=$(find . -name '*.whl')" >> $GITHUB_ENV
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: opencv_wheel_${{ matrix.os }}_py${{ matrix.python-version }}
         path: ${{ env.WHEEL_NAME }}
