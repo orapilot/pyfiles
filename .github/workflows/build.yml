@@ -26,7 +26,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools
         sudo apt-get install --quiet -y --no-install-recommends \
           gstreamer1.0-gl \
           gstreamer1.0-opencv \
@@ -40,7 +39,7 @@ jobs:
 
     - name: Run build script
       env:
-        OPENCV_VER: "82"
+        OPENCV_VER: "84"
         ENABLE_CONTRIB: "0"
         ENABLE_HEADLESS: "1"
         CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
@@ -49,6 +48,7 @@ jobs:
         cd "${TMPDIR}"
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
+        cp ../pyproject.toml .
         python -m pip wheel . --verbose
 
     - name: Find wheel package
