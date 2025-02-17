@@ -1,11 +1,9 @@
 name: Build OpenCV Python Wheels
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+  release:
+    types: [published]
+    
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -44,9 +42,7 @@ jobs:
         ENABLE_HEADLESS: "1"
         CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
       run: |
-        TMPDIR=$(mktemp -d)
-        echo "TMPDIR=$TMPDIR" >> $GITHUB_ENV
-        cd "${TMPDIR}"
+        cd /tmp
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
         cp /home/runner/work/pyfiles/pyfiles/pyproject.toml .
@@ -55,11 +51,11 @@ jobs:
     - name: Find wheel package
       # 查找生成的 wheel 文件
       run: |
-        cd ${{ env.TMPDIR }}
+        cd /tmp/opencv-python-*
         echo "WHEEL_NAME=$(find . -name '*.whl')" >> $GITHUB_ENV
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: opencv_wheel_${{ matrix.os }}_py${{ matrix.python-version }}
-        path: ${{ env.WHEEL_NAME }}
+        path: ${{ WHEEL_NAME }}
