@@ -45,6 +45,7 @@ jobs:
         CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
       run: |
         TMPDIR=$(mktemp -d)
+        echo "TMPDIR=$TMPDIR" >> $GITHUB_ENV
         cd "${TMPDIR}"
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
@@ -54,6 +55,7 @@ jobs:
     - name: Find wheel package
       # 查找生成的 wheel 文件
       run: |
+        cd ${{ env.TMPDIR }}
         echo "WHEEL_NAME=$(find . -name '*.whl')" >> $GITHUB_ENV
 
     - name: Upload artifact
