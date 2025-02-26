@@ -3,10 +3,11 @@ name: Build OpenCV Python Wheels
 on:
   release:
     types: [published]
-    
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         os: [ubuntu-24.04]
