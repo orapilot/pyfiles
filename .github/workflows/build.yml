@@ -25,6 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        sudo apt-get update --allow-insecure-repositories
         sudo apt-get install --quiet -y --no-install-recommends \
           gstreamer1.0-gl \
           gstreamer1.0-opencv \
