@@ -39,7 +39,7 @@ jobs:
 
     - name: Run build script
       env:
-        OPENCV_VER: "84"
+        OPENCV_VER: "86"
         ENABLE_CONTRIB: "0"
         ENABLE_HEADLESS: "1"
         CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
