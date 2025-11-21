@@ -45,7 +45,8 @@ jobs:
           libgstreamer1.0-dev \
           gstreamer1.0-plugins-base \
           gstreamer1.0-libav \
-          cmake
+          libgbm-dev \
+          cmake wget curl
 
     - name: Run build script
       env:
@@ -55,16 +56,36 @@ jobs:
         CMAKE_ARGS: "-DWITH_GSTREAMER=ON"
       run: |
         cd /tmp
+        echo '#ifndef GBM_PRIV_H
+        #define GBM_PRIV_H
+        #include <stdint.h>
+        #include <stdlib.h>
+        #include <sys/types.h>
+        #include "drv.h"
+        #include "gbm.h"
+        struct gbm_device {
+          struct driver *drv;
+        };
+        struct gbm_surface {
+        };
+        struct gbm_bo {
+          struct gbm_device *gbm;
+          struct bo *bo;
+          uint32_t gbm_format;
+          void *user_data;
+          void (*destroy_user_data)(struct gbm_bo *, void *);
+        };
+        #endif' |sudo tee /usr/include/gbm_priv.h
         git clone https://git.codelinaro.org/clo/le/platform/vendor/qcom-opensource/gst-plugins-qti-oss.git -b imsdk.lnx.2.0.0.r1-rel
         cd /tmp/gst-plugins-qti-oss/gst-plugin-base
         mkdir build && cd build
-        cmake .. -DGST_ALLOC_FOUND=1 -DGST_VIDEO_FOUND=1 -DGST_VERSION_REQUIRED=1.24.0
+        cmake .. -DGST_ALLOC_FOUND=1 -DGST_VIDEO_FOUND=1 -DGST_VERSION_REQUIRED=1.24.0 -DHAVE_DRV_H=0
         make -j$(nproc)
         sudo make install
         ninja -C build install
         cd /tmp/gst-plugins-qti-oss/gst-plugin-qmmfsrc
         mkdir build && cd build
-        cmake .. -DGST_ALLOC_FOUND=1 -DGST_VIDEO_FOUND=1 -DGST_VERSION_REQUIRED=1.24.0
+        cmake .. -DGST_ALLOC_FOUND=1 -DGST_VIDEO_FOUND=1 -DGST_VERSION_REQUIRED=1.24.0 -DHAVE_DRV_H=0
         make -j$(nproc)
         sudo make install
         cd /tmp
