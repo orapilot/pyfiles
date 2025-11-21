@@ -43,7 +43,7 @@ jobs:
           libgstreamer-plugins-bad1.0-dev \
           libgstreamer1.0-0 \
           libgstreamer1.0-dev \
-          meson ninja-build
+          cmake
 
     - name: Run build script
       env:
@@ -55,11 +55,16 @@ jobs:
         cd /tmp
         git clone https://git.codelinaro.org/clo/le/platform/vendor/qcom-opensource/gst-plugins-qti-oss.git -b imsdk.lnx.2.0.0.r1-rel
         cd /tmp/gst-plugins-qti-oss/gst-plugin-base
-        meson build --prefix=/usr
+        mkdir build && cd build
+        cmake ..
+        make -j$(nproc)
+        sudo make install
         ninja -C build install
         cd /tmp/gst-plugins-qti-oss/gst-plugin-qmmfsrc
-        meson build --prefix=/usr
-        ninja -C build install
+        mkdir build && cd build
+        cmake ..
+        make -j$(nproc)
+        sudo make install
         cd /tmp
         git clone --branch ${OPENCV_VER} --depth 1 --recurse-submodules --shallow-submodules https://github.com/opencv/opencv-python.git opencv-python-${OPENCV_VER}
         cd opencv-python-${OPENCV_VER}
